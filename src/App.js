@@ -1,25 +1,51 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import ApolloClient, { gql } from "apollo-boost";
+import { ApolloProvider, Query } from "react-apollo";
+
+const graphQLClient = new ApolloClient({
+  uri: 'https://graphql-jenkins.g4v.dev/graphql/',
+  // credentials: 'include'
+});
+
+const graphQLStr = `query {
+     allItems {
+         name
+         id
+         url
+         fullDisplayName
+         ... on hudson_model_Job {
+             color
+             healthReport {
+                 _class
+                 iconClassName
+                 description
+                 iconUrl
+                 score
+             }
+         }
+     }
+ }`;
+const query = gql(graphQLStr);
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApolloProvider client={graphQLClient}>
+      <div className="App">
+        <header className="App-header">
+        </header>
+        <pre><xmp>{ graphQLStr }</xmp></pre>
+        <Query query={query}>
+          {({ loading, error, data }) => {
+            if (loading) return <p>Loading data from Apollo Client...</p>;
+
+            return <pre><xmp>{JSON.stringify({ loading, error, data }, null, "\t")}</xmp></pre>;
+          }}
+        </Query>
+
+        <a href="https://github.com/halkeye/graphql-apollo-test">Github Source</a>
+      </div>
+    </ApolloProvider>
   );
 }
 
